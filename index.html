@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+</head>
+<body>
+
+    <!-- Поле для выбора начальной даты -->
+    <input id="calendar" type="text" placeholder="Выберите дату" />
+
+    <!-- Поле для выбора даты возврата -->
+    <input id="calendar2" type="text" placeholder="Выберите дату возврата" />
+
+    <script>
+        // Инициализация первого календаря (дата начала)
+        flatpickr("#calendar", {
+            locale: "ru",        // Локализация
+            dateFormat: "d-m-Y ", // Формат даты
+            minDate: "today",    // Минимальная дата (сегодня)
+            onChange: function(selectedDates) {
+                if (selectedDates.length > 0) {
+                    // Получаем выбранную дату (первую дату из массива selectedDates)
+                    let startDate = selectedDates[0];
+
+                    // Добавляем 2 дня к выбранной дате для расчета даты возврата
+                    let returnDate = new Date(startDate);
+                    returnDate.setDate(startDate.getDate() + 2); // Добавляем 2 дня
+
+                    // Устанавливаем дату возврата в календарь2
+                    document.getElementById("calendar2")._flatpickr.setDate(returnDate, true);
+
+                    // Обновляем минимальную дату для календаря даты возврата, чтобы она не могла быть раньше на 2 дня
+                    document.getElementById("calendar2")._flatpickr.set('minDate', returnDate);
+                }
+            }
+        });
+
+        // Инициализация второго календаря (дата возврата)
+        flatpickr("#calendar2", {
+            locale: "ru",        // Локализация
+            dateFormat: "d-m-Y", // Формат даты
+            minDate: "today",    // Минимальная дата (сегодня)
+            allowInput: false,   // Запрещаем ручной ввод
+            onChange: function(selectedDates) {
+                if (selectedDates.length > 0) {
+                    // Получаем выбранную дату возврата
+                    let returnDate = selectedDates[0];
+
+                    // Получаем выбранную дату начала
+                    let startDate = document.getElementById("calendar")._flatpickr.selectedDates[0];
+
+                    // Проверка, чтобы дата возврата была минимум через 2 дня после начала
+                    if (returnDate <= startDate) {
+                        alert("Дата возврата должна быть минимум на 2 дня позже даты начала.");
+                        document.getElementById("calendar2")._flatpickr.clear(); // Очищаем поле возврата
+                    }
+                }
+            }
+        });
+    </script>
+    
+</body>
+</html>
