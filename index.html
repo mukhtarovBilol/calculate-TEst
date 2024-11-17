@@ -15,11 +15,14 @@
     <!-- Поле для выбора даты возврата -->
     <input id="calendar2" type="text" placeholder="Выберите дату возврата" />
 
+    <!-- Место для вывода сообщений об ошибках -->
+    <div id="error-message" style="color: red; font-size: 14px; margin-top: 10px;"></div>
+
     <script>
         // Инициализация первого календаря (дата начала)
         flatpickr("#calendar", {
             locale: "ru",        // Локализация
-            dateFormat: "d-m-Y ", // Формат даты
+            dateFormat: "Y-m-d", // Формат даты
             minDate: "today",    // Минимальная дата (сегодня)
             onChange: function(selectedDates) {
                 if (selectedDates.length > 0) {
@@ -42,10 +45,13 @@
         // Инициализация второго календаря (дата возврата)
         flatpickr("#calendar2", {
             locale: "ru",        // Локализация
-            dateFormat: "d-m-Y", // Формат даты
+            dateFormat: "Y-m-d", // Формат даты
             minDate: "today",    // Минимальная дата (сегодня)
             allowInput: false,   // Запрещаем ручной ввод
             onChange: function(selectedDates) {
+                const errorMessageDiv = document.getElementById("error-message");
+                errorMessageDiv.textContent = ''; // Сбросим сообщение об ошибке при изменении даты
+
                 if (selectedDates.length > 0) {
                     // Получаем выбранную дату возврата
                     let returnDate = selectedDates[0];
@@ -55,8 +61,17 @@
 
                     // Проверка, чтобы дата возврата была минимум через 2 дня после начала
                     if (returnDate <= startDate) {
-                        alert("Дата возврата должна быть минимум на 2 дня позже даты начала.");
+                        errorMessageDiv.textContent = "Ошибка: дата возврата должна быть минимум на 2 дня позже даты начала.";
                         document.getElementById("calendar2")._flatpickr.clear(); // Очищаем поле возврата
+                    } else {
+                        // Проверка, чтобы дата возврата не была слишком далеко (например, не более 60 дней)
+                        let maxReturnDate = new Date(startDate);
+                        maxReturnDate.setDate(startDate.getDate() + 60); // Например, 60 дней
+
+                        if (returnDate > maxReturnDate) {
+                            errorMessageDiv.textContent = "Ошибка: дата возврата не может быть более 60 дней после даты начала.";
+                            document.getElementById("calendar2")._flatpickr.clear(); // Очищаем поле возврата
+                        }
                     }
                 }
             }
